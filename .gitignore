@@ -1,5 +1,4 @@
-*.ini
-*.err
-*.log
-*.pid
-*.inc
+/.idea
+/flexviews/consumer/log/*
+!/flexviews/consumer/log/.gitkeep
+/flexviews/consumer/consumer.ini

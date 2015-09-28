@@ -1,0 +1,65 @@
+#!/bin/sh
+# kFreeBSD do not accept scripts as interpreters, using #!/bin/sh and sourcing.
+if [ true != "$INIT_D_SCRIPT_SOURCED" ] ; then
+    set "$0" "$@"; INIT_D_SCRIPT_SOURCED=true . /lib/init/init-d-script
+fi
+### BEGIN INIT INFO
+# Provides:          flexcdc
+# Required-Start:    $remote_fs $syslog
+# Required-Stop:     $remote_fs $syslog
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: start flexcdc as deamon
+# Description:       control flexcdc task
+### END INIT INFO
+
+# Author: Mario Gleichmann <mario.gleichmann@orcas.de>
+#
+# Please remove the "Author" lines above and replace them
+# with your own name if you copy and modify this script.
+
+NAME="flexcdcd"
+DESC="daemon for flexcdc task"
+BASEDIR="/opt/swanhart-tools/flexviews/consumer"
+CONFIG="consumer.ini"
+
+PIDFILE="${BASEDIR}/flexcdc.pid"
+LOGFILE="${BASEDIR}/"$(grep failure_error_log "${BASEDIR}/${CONFIG}"|cut -d= -f2)
+DAEMON="${BASEDIR}/flexcdcd"
+DAEMON_OPTS=""
+
+test -x $DAEMON || exit 0
+
+set -e
+
+# Get lsb functions
+. /lib/lsb/init-functions
+
+case "$1" in
+    start)
+        log_begin_msg "Starting $NAME..."
+        start-stop-daemon --start --background --make-pidfile --pidfile ${PIDFILE} --exec ${DAEMON} ${DAEMON_OPTS} >> $LOGFILE
+        log_end_msg $?
+        ;;
+    stop)
+        log_begin_msg "Stopping $NAME..."
+        start-stop-daemon --stop --pidfile ${PIDFILE} --signal 15
+        log_end_msg $?
+        rm -f $PIDFILE
+        ;;
+    restart)
+        $0 stop
+        sleep 1
+        $0 start
+        ;;
+    reload|force-reload)
+        log_begin_msg "Reloading $NAME..."
+        start-stop-daemon --stop --signal 1 --exec ${DAEMON}
+        log_end_msg $?
+        ;;
+    *)
+        log_success_msg "Usage: $0 {start|stop|restart|reload|force-reload}"
+        exit 1
+esac
+
+exit 0

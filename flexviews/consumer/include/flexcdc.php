@@ -18,7 +18,7 @@
     If not, see <http://www.gnu.org/licenses/>.
 */
 
-error_reporting(E_ALL);
+error_reporting(E_ALL & ~E_STRICT & ~E_DEPRECATED);
 ini_set('memory_limit', 1024 * 1024 * 1024);
 define('SOURCE', 'source');
 define('DEST', 'dest');
